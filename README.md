@@ -1,4 +1,4 @@
-<img width="96" height="96" alt="image" src="https://github.com/user-attachments/assets/fbaff92d-3100-4a24-88af-1957727406fa" />
+<img width="96" height="96" alt="image" src="https://github.com/user-attachments/assets/6040ca60-c122-4028-8f2e-3ab136518bbe" />
 
 # MDBinWaterfall
 A clone of Binary Waterfall but compatible with 4 or 8 bpp.
