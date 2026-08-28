@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="win7classic">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Binary Waterfall Visualizer & Audio Player (Win7 Classic)</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Menu Superior Estilo Windows 7 -->
+  <div class="top-menu">
+    <div class="dropdown">
+      <button id="menuFileBtn" class="menu-btn">Arquivo ▾</button>
+      <div id="fileDropdown" class="dropdown-content hidden">
+        <button id="menuOpenBin">📁 Abrir Binário (.bin, .rom...)</button>
+        <button id="menuImportPal">🎨 Importar Paleta (.txt, .pal, .bin)</button>
+        <button id="menuExportPalBin">💾 Exportar Paleta MD (.bin)</button>
+        <hr>
+        <button id="menuExportAudio">🔊 Exportar Áudio...</button>
+        <button id="menuExportVideo">🎥 Exportar Vídeo (MP4/AVI)...</button>
+        <hr>
+        <button id="menuReset">🔄 Resetar Visualizador</button>
+      </div>
+    </div>
+
+    <button id="menuAboutBtn" class="menu-btn">Sobre</button>
+
+    <!-- Seletor de Temas -->
+    <div class="theme-selector">
+      <label for="themeSelect">Tema Visual:</label>
+      <select id="themeSelect">
+        <option value="win7classic" selected>Windows 7 Classic / Aero</option>
+        <option value="normal">Windows Classic (XP/98)</option>
+        <option value="light">Claro (Light)</option>
+        <option value="dark">Escuro (Dark)</option>
+        <option value="onix">Onix</option>
+        <option value="amoled">AMOLED (Pure Black)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="main-container">
+    
+    <!-- Painel de Controles da Esquerda -->
+    <div class="sidebar">
+      
+      <!-- Seção: Arquivo Binário -->
+      <fieldset class="panel-section">
+        <legend>📁 Arquivo Binário</legend>
+        <input type="file" id="fileInput" accept=".bin,.rom,.raw,.dat,.smc,.sfc,.md,*">
+        <div id="fileInfo" class="file-info">Nenhum arquivo carregado</div>
+        <button id="btnDetectBpp" class="btn" style="margin-top: 6px; width: 100%;">🔍 Detectar BPP Ideal</button>
+      </fieldset>
+
+      <!-- Seção: Renderização & BPP -->
+      <fieldset class="panel-section">
+        <legend>🖼️ Renderização & BPP</legend>
+        
+        <div class="input-row">
+          <div class="input-field">
+            <label for="frameWidth">Largura (Width):</label>
+            <input type="number" id="frameWidth" value="256" min="8" max="2048" step="1">
+          </div>
+          <div class="input-field">
+            <label for="frameHeight">Altura (Height):</label>
+            <input type="number" id="frameHeight" value="256" min="8" max="2048" step="1">
+          </div>
+        </div>
+
+        <label for="zoomSelect">Zoom (Escala):</label>
+        <select id="zoomSelect">
+          <option value="1">1x (Original)</option>
+          <option value="2" selected>2x</option>
+          <option value="3">3x</option>
+          <option value="4">4x</option>
+          <option value="8">8x</option>
+        </select>
+
+        <label for="bppSelect">Modo BPP:</label>
+        <select id="bppSelect">
+          <option value="2">2 BPP (4 Cores)</option>
+          <option value="4">4 BPP (16 Cores)</option>
+          <option value="4_md" selected>4 BPP Mega Drive / SNES</option>
+          <option value="8">8 BPP (256 Cores)</option>
+          <option value="16">16 BPP (High Color RGB565)</option>
+          <option value="24">24 BPP (True Color RGB888)</option>
+          <option value="32">32 BPP (RGBA)</option>
+          <option value="exe">Modo Análise / Executável</option>
+        </select>
+
+        <label for="layoutModeSelect">Arranjo / Layout:</label>
+        <select id="layoutModeSelect">
+          <option value="tiles" selected>Grade de Tiles (Custom H x V)</option>
+          <option value="bitmap">Bitmap Continuous (Linear Direct)</option>
+        </select>
+
+        <!-- Configurações de Tile Horizontal e Vertical -->
+        <div class="input-row" id="tileSettingsRow">
+          <div class="input-field">
+            <label for="tileWidthSelect">Tile Largura (H):</label>
+            <select id="tileWidthSelect">
+              <option value="1">1 px</option>
+              <option value="2">2 px</option>
+              <option value="4">4 px</option>
+              <option value="8" selected>8 px (Padrão)</option>
+              <option value="16">16 px</option>
+              <option value="32">32 px</option>
+            </select>
+          </div>
+          <div class="input-field">
+            <label for="tileHeightSelect">Tile Altura (V):</label>
+            <select id="tileHeightSelect">
+              <option value="1">1 px</option>
+              <option value="2">2 px</option>
+              <option value="4">4 px</option>
+              <option value="8" selected>8 px (Padrão)</option>
+              <option value="16">16 px</option>
+              <option value="32">32 px</option>
+            </select>
+          </div>
+        </div>
+
+        <label for="paletteSelect">Paleta Preset:</label>
+        <select id="paletteSelect">
+          <option value="custom">Personalizada / Editável</option>
+          <option value="megadrive" selected>Sega Mega Drive</option>
+          <option value="snes">Super Nintendo (SNES)</option>
+          <option value="nes">Nintendo (NES)</option>
+          <option value="gameboy">Game Boy Classic</option>
+          <option value="mastersystem">Master System</option>
+        </select>
+
+        <div class="control-group">
+          <label for="paletteFileInput">Importar Paleta (.txt / .hex / .bin / .pal):</label>
+          <input type="file" id="paletteFileInput" accept=".txt,.pal,.hex,.act,.bin">
+        </div>
+
+        <button id="btnExportPaletteBinSidebar" class="btn" style="margin-top: 8px; width: 100%;">💾 Exportar Paleta MD (.bin)</button>
+
+        <label>Cores da Paleta (Ativas p/ BPP):</label>
+        <div id="paletteInputs" class="palette-grid"></div>
+      </fieldset>
+
+      <!-- Seção: Configuração de Áudio -->
+      <fieldset class="panel-section">
+        <legend>🔊 Configuração de Áudio</legend>
+
+        <label for="audioFormatSelect">Formato do Amostrador:</label>
+        <select id="audioFormatSelect">
+          <option value="pcm_u8">Unsigned 8-bit PCM (0..255)</option>
+          <option value="pcm_s8">Signed 8-bit PCM (-128..127)</option>
+          <option value="dpcm_nes">NES DPCM (1-bit Delta)</option>
+          <option value="dpcm_md">Mega Drive / Genesis DPCM (4-bit)</option>
+        </select>
+
+        <label for="sampleRateInput">Taxa de Amostragem (Hz):</label>
+        <input type="number" id="sampleRateInput" value="22050" step="100">
+
+        <label for="manualOffsetInput">Offset Manual (Decimal ou Hex):</label>
+        <input type="text" id="manualOffsetInput" value="0x000000" placeholder="0x000000 ou 0">
+
+        <div class="audio-controls">
+          <button id="btnPlayAudio" class="btn">▶ Play</button>
+          <button id="btnPauseAudio" class="btn">⏸ Pause</button>
+          <button id="btnStopAudio" class="btn">⏹ Stop</button>
+        </div>
+      </fieldset>
+
+    </div>
+
+    <!-- Área de Visualização do Canvas -->
+    <div class="canvas-container">
+      <div class="canvas-wrapper">
+        <canvas id="waterfallCanvas"></canvas>
+      </div>
+
+      <!-- Barra de Controle do Deslizador -->
+      <div class="player-bar">
+        <span id="currentTime">00:00</span>
+        <input type="range" id="seekSlider" min="0" max="100" value="0" step="0.01">
+        <span id="totalTime">00:00</span>
+      </div>
+      <div class="status-bar">
+        <span id="hexOffset">Offset: 0x000000 (Byte: 0)</span>
+        <span id="statusText">Pronto.</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Modal Exportar Áudio -->
+  <div id="audioExportModal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Exportar Áudio</h3>
+        <button id="closeAudioModal" class="btn-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <label for="exportAudioFormat">Selecione o formato de saída:</label>
+        <select id="exportAudioFormat">
+          <option value="wav">WAV (Uncompressed PCM)</option>
+          <option value="raw">RAW (Headerless Binary PCM)</option>
+          <option value="mp3">MP3 Audio</option>
+          <option value="ogg">OGG Vorbis Audio</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button id="btnConfirmAudioExport" class="btn">Salvar Arquivo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Exportar Vídeo -->
+  <div id="videoExportModal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Exportar Vídeo Visualizador</h3>
+        <button id="closeVideoModal" class="btn-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <label for="exportVideoMode">Modo de Exportação:</label>
+        <select id="exportVideoMode">
+          <option value="direct" selected>🚀 Renderizar Direto sem Gravar (Offline Rápido)</option>
+          <option value="realtime">🎥 Gravação de Tela do Canvas em Tempo Real</option>
+        </select>
+
+        <label for="exportVideoFormat" style="margin-top: 10px;">Formato do Arquivo de Vídeo:</label>
+        <select id="exportVideoFormat">
+          <option value="mp4">MP4 Video (H.264 / AAC)</option>
+          <option value="webm">WebM Video (VP9 / Opus)</option>
+        </select>
+        <p style="margin-top: 10px; font-size:11px; opacity:0.8;">
+          * Inclui áudio mixado sincronizado na renderização do vídeo.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button id="btnStartRecordVideo" class="btn">Exportar Vídeo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Sobre -->
+  <div id="modalOverlay" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Sobre o Binary Waterfall Visualizer</h3>
+        <button id="closeAboutModal" class="btn-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Visualizador binário de ROMs e reprodutor de áudio PCM/DPCM com detecção automática de BPP, renderização por Bitmap/Tiles personalizáveis para todos os BPPs (4, 8, 16, 24, 32 BPP) e exportação avançada de vídeo com áudio incluso.</p>
+      </div>
+      <div class="modal-footer">
+        <button id="btnOkAbout" class="btn">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
